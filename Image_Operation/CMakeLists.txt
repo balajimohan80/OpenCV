@@ -3,5 +3,4 @@ project(Image_Operation)
 ADD_SUBDIRECTORY( Image_Create )
 ADD_SUBDIRECTORY( Image_Crop )
 ADD_SUBDIRECTORY( Image_InterPolation )
-
-
+ADD_SUBDIRECTORY( Image_Mask )
