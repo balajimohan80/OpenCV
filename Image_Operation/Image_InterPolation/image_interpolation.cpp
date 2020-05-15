@@ -5,6 +5,16 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
+//Convert Image Size into String
+std::string Image_Size_To_Str(const cv::Mat &Image) {
+	std::string Ret;
+	Ret += "W: ";
+	Ret += std::to_string(Image.size().width);
+	Ret += " H: ";
+	Ret += std::to_string(Image.size().height);
+	return Ret;
+}
+
 int main() {
 	cv::Mat Input_Image = cv::imread("boy.jpg/boy.jpg", 1);
 	const std::string Orig_Image = "Original_Image";
@@ -36,9 +46,10 @@ int main() {
 	cv::Mat Resize_Up_Image;
 	cv::resize(Input_Image, Resize_Up_Image, cv::Size(Resize_Up_Width, Resize_Up_Height),
 		0.0, 0.0, cv::INTER_LINEAR);
+	
 
-	const std::string Scaled_Down = "Scaled_Down";
-	const std::string Scaled_Up   = "Scaled_Up";
+	const std::string Scaled_Down = "Down: " + Image_Size_To_Str(Resize_Down_Image);
+	const std::string Scaled_Up   = "Up: " + Image_Size_To_Str(Resize_Up_Image);
 	cv::namedWindow(Scaled_Down);
 	cv::imshow(Scaled_Down, Resize_Down_Image);
 
