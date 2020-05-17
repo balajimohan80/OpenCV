@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(Image_MathOperation)
+ADD_SUBDIRECTORY( Contrast_Enhancement )
+ADD_SUBDIRECTORY( Brightness_Enhancement )
+ADD_SUBDIRECTORY( Normalization )
