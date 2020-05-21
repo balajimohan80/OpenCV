@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(Sunglass_Filter)
+ADD_SUBDIRECTORY( Arithmetic_Ooperations )
+ADD_SUBDIRECTORY( Naive_Replace )
+ADD_SUBDIRECTORY( Excercise  )
