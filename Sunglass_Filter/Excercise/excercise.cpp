@@ -6,120 +6,104 @@
 #include<opencv2/highgui.hpp>
 #include<opencv2/opencv.hpp>
 
-template<typename T1>
-void Split_3_Channels(const cv::Mat& BGR_Image, std::vector<cv::Mat>& BGR_Channel) {
-	cv::Mat_<cv::Vec<T1, 3>>::const_iterator BGR_Image_Begin = BGR_Image.begin<cv::Vec<T1, 3>>();
-	cv::Mat_<cv::Vec<T1, 3>>::const_iterator BGR_Image_End   = BGR_Image.end<cv::Vec<T1, 3>>();
+class Image_Mask {
+private:
+	template<typename T1>
+	void Mask_BGR_With_Alpha(const cv::Mat& Masked_Alpha_Image, cv::Mat& Output_Image, cv::Vec<T1, 3> & Default_Pix_Val) {
+		cv::Mat_<cv::Vec<T1, 1>>::const_iterator Masked_Alpha_Begin = Masked_Alpha_Image.begin<cv::Vec<T1, 1>>();
+		cv::Mat_<cv::Vec<T1, 1>>::const_iterator Masked_Alpha_End = Masked_Alpha_Image.end<cv::Vec<T1, 1>>();
+		cv::Mat_<cv::Vec<T1, 3>>::iterator Output_BGR_Begin = Output_Image.begin<cv::Vec<T1, 3>>();
 
-	cv::Mat_<cv::Vec<T1, 1>>::iterator B_Channel_Begin = BGR_Channel[0].begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator G_Channel_Begin = BGR_Channel[1].begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator R_Channel_Begin = BGR_Channel[2].begin<cv::Vec<T1, 1>>();
-
-	while (BGR_Image_Begin != BGR_Image_End) {
-		(*B_Channel_Begin++)[0] = (*BGR_Image_Begin)[0];
-		(*G_Channel_Begin++)[0] = (*BGR_Image_Begin)[1];
-		(*R_Channel_Begin++)[0] = (*BGR_Image_Begin)[2];
-		++BGR_Image_Begin;
-	}
-}
-
-template<typename T1>
-void Merge_3_Channels(const std::vector<cv::Mat>& BGR_Channel, cv::Mat& BGR_Image) {
-	cv::Mat_<cv::Vec<T1, 3>>::iterator BGR_Image_Begin = BGR_Image.begin<cv::Vec<T1, 3>>();
-	cv::Mat_<cv::Vec<T1, 3>>::iterator BGR_Image_End = BGR_Image.end<cv::Vec<T1, 3>>();
-
-	cv::Mat_<cv::Vec<T1, 1>>::const_iterator B_Channel_Begin = BGR_Channel[0].begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::const_iterator G_Channel_Begin = BGR_Channel[1].begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::const_iterator R_Channel_Begin = BGR_Channel[2].begin<cv::Vec<T1, 1>>();
-
-	while (BGR_Image_Begin != BGR_Image_End) {
-		(*BGR_Image_Begin)[0] = (*B_Channel_Begin++)[0];
-		(*BGR_Image_Begin)[1] = (*G_Channel_Begin++)[0];
-		(*BGR_Image_Begin)[2] = (*R_Channel_Begin++)[0];
-		++BGR_Image_Begin;
-	}
-}
-
-template<typename T1>
-void Split_Alpha_And_BGR_Channel(const cv::Mat& Image, std::vector<cv::Mat>& BGR_Ch, cv::Mat& Alpha_Ch) {
-	cv::Mat_<cv::Vec<T1, 1>>::iterator B_CH_Begin = BGR_Ch[0].begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator G_CH_Begin = BGR_Ch[1].begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator R_CH_Begin = BGR_Ch[2].begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_Begin = Alpha_Ch.begin<cv::Vec<T1, 1>>();
-
-	cv::Mat_<cv::Vec<T1, 4>>::const_iterator Image_Begin = Image.begin<cv::Vec<T1, 4>>();
-	cv::Mat_<cv::Vec<T1, 4>>::const_iterator Image_End   = Image.end<cv::Vec<T1, 4>>();
-
-	while (Image_Begin != Image_End) {
-		(*B_CH_Begin)[0]      = (*Image_Begin)[0];
-		(*G_CH_Begin)[0]      = (*Image_Begin)[1];
-		(*R_CH_Begin)[0]      = (*Image_Begin)[2];
-		(*Alpha_CH_Begin)[0]  = (*Image_Begin)[3];
-		++B_CH_Begin;
-		++G_CH_Begin;
-		++R_CH_Begin;
-		++Alpha_CH_Begin;
-		++Image_Begin;
+		while (Masked_Alpha_Begin != Masked_Alpha_End) {
+			if ((*Masked_Alpha_Begin)[0]) {
+				*Output_BGR_Begin = Default_Pix_Val;
+			}
+			Output_BGR_Begin++;
+			Masked_Alpha_Begin++;
+		}
 	}
 
-}
+	template<typename T1>
+	void Split_Alpha_and_BGR(const cv::Mat& BGRA, cv::Mat& BGR, cv::Mat& Alpha) {
+		cv::Mat_<cv::Vec<T1, 4>>::const_iterator BGRA_CH_Begin = BGRA.begin<cv::Vec<T1, 4>>();
+		cv::Mat_<cv::Vec<T1, 3>>::iterator BGR_CH_Begin = BGR.begin<cv::Vec<T1, 3>>();
+		cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_Begin = Alpha.begin<cv::Vec<T1, 1>>();
+		cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_End = Alpha.end<cv::Vec<T1, 1>>();
 
-template<typename T1>
-void Multiply(cv::Mat &BGR_Ch, cv::Mat& Alpha_Channel) {
-	cv::Mat_<cv::Vec<T1, 3>>::iterator BGR_CH_Begin = BGR_Ch.begin<cv::Vec<T1, 3>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_Begin = Alpha_Channel.begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_End = Alpha_Channel.end<cv::Vec<T1, 1>>();
-
-	while (Alpha_CH_Begin != Alpha_CH_End) {
-		(*BGR_CH_Begin)[0] *= (*Alpha_CH_Begin)[0];
-		(*BGR_CH_Begin)[1] *= (*Alpha_CH_Begin)[0];
-		(*BGR_CH_Begin++)[2] *= (*Alpha_CH_Begin++)[0];
+		while (Alpha_CH_Begin != Alpha_CH_End) {
+			(*BGR_CH_Begin)[0] = (*BGRA_CH_Begin)[0];
+			(*BGR_CH_Begin)[1] = (*BGRA_CH_Begin)[1];
+			(*BGR_CH_Begin++)[2] = (*BGRA_CH_Begin)[2];
+			(*Alpha_CH_Begin++)[0] = (*BGRA_CH_Begin++)[3];
+		}
 	}
 
-}
+	template<typename T1>
+	void Multiply(cv::Mat& BGR_Ch, cv::Mat& Alpha_Channel) {
+		cv::Mat_<cv::Vec<T1, 3>>::iterator BGR_CH_Begin = BGR_Ch.begin<cv::Vec<T1, 3>>();
+		cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_Begin = Alpha_Channel.begin<cv::Vec<T1, 1>>();
+		cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_End = Alpha_Channel.end<cv::Vec<T1, 1>>();
 
-template<typename T1>
-void Split_Alpha_and_BGR(const cv::Mat& BGRA, cv::Mat& BGR, cv::Mat& Alpha) {
-	cv::Mat_<cv::Vec<T1, 4>>::const_iterator BGRA_CH_Begin  = BGRA.begin<cv::Vec<T1, 4>>();
-	cv::Mat_<cv::Vec<T1, 3>>::iterator BGR_CH_Begin   = BGR.begin<cv::Vec<T1, 3>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_Begin = Alpha.begin<cv::Vec<T1, 1>>();
-	cv::Mat_<cv::Vec<T1, 1>>::iterator Alpha_CH_End   = Alpha.end<cv::Vec<T1, 1>>();
+		while (Alpha_CH_Begin != Alpha_CH_End) {
+			(*BGR_CH_Begin)[0] *= (*Alpha_CH_Begin)[0];
+			(*BGR_CH_Begin)[1] *= (*Alpha_CH_Begin)[0];
+			(*BGR_CH_Begin++)[2] *= (*Alpha_CH_Begin++)[0];
+		}
 
-	while (Alpha_CH_Begin != Alpha_CH_End) {
-		(*BGR_CH_Begin)[0]   = (*BGRA_CH_Begin)[0];
-		(*BGR_CH_Begin)[1]   = (*BGRA_CH_Begin)[1];
-		(*BGR_CH_Begin++)[2]   = (*BGRA_CH_Begin)[2];
-		(*Alpha_CH_Begin++)[0] = (*BGRA_CH_Begin++)[3];
 	}
-}
+
+
+public:
+	static void Apply_Mask(cv::Mat& In_BGR_Image, cv::Mat& M_BGRA_Image, cv::Range X, cv::Range Y, bool Mask_Not_Apply) {
+		static Image_Mask M;
+		In_BGR_Image.convertTo(In_BGR_Image, CV_32FC3);
+		In_BGR_Image = In_BGR_Image / 255.0;
+
+		M_BGRA_Image.convertTo(M_BGRA_Image, CV_32FC4);
+		double Re_Size_X = static_cast<double>(X.end - X.start) / static_cast<double>(M_BGRA_Image.size().width);
+		double Re_Size_Y = static_cast<double>(Y.end - Y.start) / static_cast<double>(M_BGRA_Image.size().height);
+		cv::resize(M_BGRA_Image, M_BGRA_Image, cv::Size(), Re_Size_X, Re_Size_Y);
+		M_BGRA_Image = M_BGRA_Image / 255.0;
+
+	
+		//Split BGR & Alpha channel
+		cv::Mat M_BGR_Image(M_BGRA_Image.size(), CV_32FC3);
+		cv::Mat M_Alpha_Image(M_BGRA_Image.size(), CV_32FC1);
+		M.Split_Alpha_and_BGR<float>(M_BGRA_Image, M_BGR_Image, M_Alpha_Image);
+		M.Multiply<float>(M_BGR_Image, M_Alpha_Image);
+	
+		cv::Mat ROI_Image = In_BGR_Image(Y, X);
+		if (Mask_Not_Apply)
+			cv::add(ROI_Image, M_BGR_Image, ROI_Image);
+		else
+			M.Mask_BGR_With_Alpha<float>(M_Alpha_Image, ROI_Image, cv::Vec3f { 0.172, 0.172, 0.172 });
+
+		In_BGR_Image = In_BGR_Image * 255;
+		In_BGR_Image.convertTo(In_BGR_Image, CV_8UC3);
+	}
+	
+};
 
 int main() {
+	const std::string Mustache = "Mustache.png";
 	cv::Mat Input_Image = cv::imread("musk.jpg");
-	Input_Image.convertTo(Input_Image, CV_32FC3);
-	Input_Image = Input_Image / 255.0;
+	cv::Mat Sunglass_Image = cv::imread("sunglass.png", -1);
+	cv::Mat Mustache_Image = cv::imread(Mustache, -1);
 
-	cv::Mat Sunglass_Image  = cv::imread("sunglass.png", -1);
-	Sunglass_Image.convertTo(Sunglass_Image, CV_32FC4);
-	cv::resize(Sunglass_Image, Sunglass_Image, cv::Size(), 0.5, 0.5);
-	Sunglass_Image = Sunglass_Image / 255.0;
-
-	//Sunglass is a 4 Channels. 3 channels are BGR and 4th channel is ALPHA
-	//Split BGR and Alpha Channel
-	cv::Mat Sun_Glass_BGR(Sunglass_Image.size(), CV_32FC3);
-	cv::Mat Sun_Glass_Alpha(Sunglass_Image.size(), CV_32FC1);
-	Split_Alpha_and_BGR<float>(Sunglass_Image, Sun_Glass_BGR, Sun_Glass_Alpha);
-	Multiply<float>(Sun_Glass_BGR, Sun_Glass_Alpha);
-
-
-	const int Y1 = 140;
-	const int Y2 = Y1 + Sunglass_Image.size().height;
-	const int X1 = 130;
-	const int X2 = X1 + Sunglass_Image.size().width;
-
-	cv::Mat Face_ROI = Input_Image(cv::Range(Y1, Y2), cv::Range(X1, X2));
-	cv::add(Face_ROI, Sun_Glass_BGR, Face_ROI);
-	cv::imshow("Ouput_Image", Input_Image);
+	cv::Range X(130, 448);
+	cv::Range Y(140, 250);
+	Image_Mask::Apply_Mask(Input_Image, Sunglass_Image, X, Y, true);
+	cv::Mat Mustache_ROI = Mustache_Image(cv::Range(35, 290), cv::Range(30, 762));
+	X.start = 198;
+	X.end   = 383;
+	Y.start = 255;
+	Y.end   = 302;
+	Image_Mask::Apply_Mask(Input_Image, Mustache_ROI, X, Y, false);
+	cv::imshow("Output_Image", Input_Image);
 	cv::waitKey(0);
 	cv::destroyAllWindows();
 	return 0;
 }
+
+
+
