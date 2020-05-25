@@ -24,8 +24,8 @@ int main() {
 		cv::ellipse(Image, Center, Axes, Angle_1, Start_Angle, End_Angle,
 			B_Color, 3, cv::LINE_AA);
 		cv::ellipse(Image, Center, Axes, Angle_2, Start_Angle, End_Angle,
-			G_Color, 3, cv::LINE_AA);
-
+			G_Color, -2, cv::LINE_AA);
+		//Increment every 90 degree
 		End_Angle += 90;
 		cv::imshow(Image_Name, Image);
 		cv::waitKey(0);
