@@ -5,6 +5,68 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+
+void Resize_Image(cv::Mat& Image, double Scaling_Ratio) {
+	Image.convertTo(Image, CV_32FC3);
+	cv::resize(Image, Image, cv::Size(), Scaling_Ratio, Scaling_Ratio, 1);
+	Image.convertTo(Image, CV_8UC3);
+}
+
+
+
+cv::Mat Add_Text_Darshan_Image(const std::string& Image_Name, 
+	const std::string &Text) {
+	cv::Mat Image = cv::imread(Image_Name, cv::IMREAD_ANYCOLOR);
+	Resize_Image(Image, 0.25);
+	cv::Point Org(0, Image.size().height-20);
+	int Font_Face = cv::FONT_HERSHEY_COMPLEX;
+	double FontScale = 1.5;
+	cv::Scalar G_Color( 0, 255, 0 );
+	int Thickness = 2;
+	int Line_Type = cv::LINE_AA;
+
+	//Adjust FontHeight based on PixelHeight
+	int Pixel_Height = 25;
+	std::cout << "Actual FontScale: " << FontScale << " ";
+	FontScale = cv::getFontScaleFromHeight(Font_Face, Pixel_Height, Thickness);
+	std::cout << "Adjusted FontScale: " << FontScale << "\n";
+	
+	//Calculate width & height of the Text
+	//To calculate Text size, following Parameters are needed
+	//1. Text
+	//2. Font type(Font_Face)
+	//3. Font Scale(FontScale)
+	//4. Thickness
+	//5. baseLine
+	int BaseLine = 0;
+	cv::Size Text_Size = cv::getTextSize(Text, Font_Face, FontScale, Thickness, &BaseLine);
+	std::cout << "Text Size: " << Text_Size << "\n";
+
+	//Now we know Text Size.
+	//Now we calculate X & Y Co-ordinates where Text wants to display in the Image.
+	// We want Text to print in Center of the Image at bottom of the Image
+	Org.x = (Image.size().width - Text_Size.width) / 2;
+	Org.y = Image.size().height - BaseLine - 10;
+	
+	//Lets create a Rectangular Canvas 
+	cv::Point Top_Rect_XY(Org.x, Image.size().height - Text_Size.height - 20);
+	cv::Point Bottom_Rect_XY(Org.x + Text_Size.width, Org.y+10);
+	cv::Scalar B_Color(0, 0, 0);
+	cv::rectangle(Image, Top_Rect_XY, Bottom_Rect_XY, B_Color, -1, cv::LINE_AA);
+
+	//Now Draw a line
+	//To Draw a line, we need two XY Co-ordinates
+	cv::Point Line_Start_XY_Coordinates(Org.x, Org.y);
+	cv::Point Line_End_XY_Coordinates(Org.x+Text_Size.width, Org.y);
+	cv::Scalar M_Line_Color(255, 0, 255);
+	cv::line(Image, Line_Start_XY_Coordinates, Line_End_XY_Coordinates,
+		M_Line_Color, 2, cv::LINE_AA);
+
+	cv::putText(Image, Text, Org, Font_Face, FontScale, G_Color, Thickness, Line_Type);
+	return Image;
+}
+
+
 int main() {
 	const std::string Image_1 = "boy.jpg";
 	cv::Mat Image_Input=cv::imread(Image_1, cv::IMREAD_COLOR);
@@ -108,6 +170,10 @@ int main() {
 		FontFace, FontScale, B_Color, Font_Thickness, cv::LINE_AA);
 	cv::imshow("Final_Image", Image_Get_Text_Size);
 
+	const std::string Image_Name_1 = "Darshan.jpg";
+	const std::string Text_1 = "My name is Darshan";
+	cv::Mat Out_Image = Add_Text_Darshan_Image(Image_Name_1, Text_1);
+	cv::imshow(Image_Name_1, Out_Image);
 
 	cv::waitKey(0);
 	cv::destroyAllWindows();
