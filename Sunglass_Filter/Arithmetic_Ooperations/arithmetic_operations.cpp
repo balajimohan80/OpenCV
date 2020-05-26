@@ -116,11 +116,6 @@ int main() {
 	
 	
 	std::vector<cv::Mat> Masked_Eye_Channels(3);
-
-	cv::Mat& B = Masked_Eye_Channels[0];
-	cv::Mat& G = Masked_Eye_Channels[1];
-	cv::Mat& R = Masked_Eye_Channels[2];
-
 	for (int i = 0; i < 3; i++) {
 		cv::multiply(Eye_ROI_BGR_Channels[i], (1 - Mask_Vec[i]), 
 			Masked_Eye_Channels[i]);
