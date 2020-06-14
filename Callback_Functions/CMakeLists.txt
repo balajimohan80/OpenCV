@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.0.0)
+project( Callback_Functions )
+ADD_SUBDIRECTORY( Keyboard )
+ADD_SUBDIRECTORY( Mouse )
