@@ -5,6 +5,7 @@
 #include<iostream>
 #include<string>
 
+//Dilation means expand or merge white regions
 void dilation() {
 	std::string image_Name = "dilation_example.jpg";
 	cv::Mat input_Image = cv::imread(image_Name, cv::IMREAD_COLOR);
@@ -31,9 +32,9 @@ void dilation() {
 	   dst = O/P Image of the same size and type as src
 	   kernel = Structuring element used for dilation.
 	   anchor = Position of the anchor within the element. Def: (-1, -1) means that the anchor is
-				at the element center.
+				at the element center of the kernel.
 	   iterations = number of iteration dilation applied. (Def: 1)
-	   borderType = Pixel extrapolation method.
+	   borderType = Pixel extrapolation method.(Def: BORDER_CONSTANT)
 	   borderValue = border value in case of constant border.
 	*/
 	cv::Mat dilated_Image;
@@ -55,6 +56,7 @@ void dilation() {
 	cv::destroyAllWindows();
 }
 
+//Erosion is used to seperate or shrink white regions
 void erosion() {
 	std::string input_Name = "erosion_example.jpg";
 	cv::Mat input_Image = cv::imread(input_Name, cv::IMREAD_COLOR);
